@@ -1,0 +1,112 @@
+import express, { Express, Request, Response, NextFunction } from "express";
+import cors from "cors";
+import { pinoHttp } from "pino-http";
+import { env } from "./entities/shared/infraestructure/config/environments";
+import { AppError } from "./entities/shared/domain/error/app-error";
+import { appConsole } from "./entities/shared/infraestructure/utils/app-console";
+import { StatusCodes } from "./entities/shared/infraestructure/lib/http-status-codes";
+import { correlationIdMiddleware } from "./api/middlewares/correlation-id.middleware";
+import { api } from "./api/api";
+
+export function server(): Express {
+  const app = express();
+
+  // Trust proxy for accurate IP detection behind load balancers
+  app.set("trust proxy", true);
+
+  // CORS configuration
+  app.use(
+    cors({
+      origin: "*",
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "X-API-Key",
+        "X-Correlation-ID",
+        "X-Request-ID",
+      ],
+      exposedHeaders: [
+        "X-Correlation-ID",
+        "X-BFF-Duration",
+        "X-Partial-Failures",
+      ],
+    })
+  );
+
+  // Body parsing
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+  // Correlation ID middleware (adds X-Correlation-ID to all requests)
+  app.use(correlationIdMiddleware);
+
+  // Request logging
+  if (env.stage !== "TEST") {
+    app.use(
+      pinoHttp({
+        level: env.stage === "DEV" ? "debug" : "info",
+        transport:
+          env.stage === "DEV"
+            ? {
+                target: "pino-pretty",
+                options: {
+                  colorize: true,
+                  translateTime: "SYS:standard",
+                  ignore: "pid,hostname",
+                },
+              }
+            : undefined,
+        customProps: (req: Request) => ({
+          correlationId: req.headers["x-correlation-id"],
+        }),
+        redact: ["req.headers.authorization", "req.headers['x-api-key']"],
+      })
+    );
+  }
+
+  // API routes
+  app.use("/v1", api());
+
+  // 404 handler
+  app.use((_req: Request, res: Response) => {
+    res.status(StatusCodes.NOT_FOUND).json({
+      success: false,
+      error: {
+        code: "NOT_FOUND",
+        message: "The requested resource was not found",
+      },
+    });
+  });
+
+  // Global error handler
+  app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
+    const correlationId = req.headers["x-correlation-id"] as string;
+
+    if (err instanceof AppError) {
+      appConsole.warn(`[${correlationId}] AppError:`, err.message);
+      return res.status(err.httpCode).json({
+        success: false,
+        error: {
+          code: err.code || "ERROR",
+          message: err.message,
+          ...(env.stage === "DEV" && { stack: err.stack }),
+        },
+        correlationId,
+      });
+    }
+
+    appConsole.error(`[${correlationId}] Unhandled error:`, err);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "An unexpected error occurred",
+        ...(env.stage === "DEV" && { stack: err.stack }),
+      },
+      correlationId,
+    });
+  });
+
+  return app;
+}

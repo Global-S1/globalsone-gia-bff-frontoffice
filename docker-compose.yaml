@@ -1,0 +1,112 @@
+version: "3.8"
+
+services:
+  # BFF Service
+  bff-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: globalsone-bff
+    ports:
+      - "3000:3000"
+    environment:
+      - STAGE=DEV
+      - APP_NAME=BFF-SERVICE
+      - APP_PORT=3000
+      - REDIS_HOST=redis://redis:6379
+      - BFF_JWT_SECRET=dev-jwt-secret-change-in-production
+      - BFF_CACHE_ENABLED=true
+      - BFF_CACHE_DEFAULT_TTL=300
+      - USERS_SERVICE_URL=http://mock-users-service:3001
+      - ORDERS_SERVICE_URL=http://mock-orders-service:3002
+      - PRODUCTS_SERVICE_URL=http://mock-products-service:3003
+      - NOTIFICATIONS_SERVICE_URL=http://mock-notifications-service:3004
+    depends_on:
+      - redis
+      - mock-users-service
+      - mock-orders-service
+      - mock-products-service
+      - mock-notifications-service
+    networks:
+      - bff-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/v1/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: globalsone-bff-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - bff-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Mock Users Service
+  mock-users-service:
+    image: node:20-alpine
+    container_name: mock-users-service
+    working_dir: /app
+    command: node mock-server.js
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./mocks/users-service:/app
+    networks:
+      - bff-network
+
+  # Mock Orders Service
+  mock-orders-service:
+    image: node:20-alpine
+    container_name: mock-orders-service
+    working_dir: /app
+    command: node mock-server.js
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./mocks/orders-service:/app
+    networks:
+      - bff-network
+
+  # Mock Products Service
+  mock-products-service:
+    image: node:20-alpine
+    container_name: mock-products-service
+    working_dir: /app
+    command: node mock-server.js
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./mocks/products-service:/app
+    networks:
+      - bff-network
+
+  # Mock Notifications Service
+  mock-notifications-service:
+    image: node:20-alpine
+    container_name: mock-notifications-service
+    working_dir: /app
+    command: node mock-server.js
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./mocks/notifications-service:/app
+    networks:
+      - bff-network
+
+networks:
+  bff-network:
+    driver: bridge
+
+volumes:
+  redis-data:
