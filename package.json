@@ -23,6 +23,7 @@
   ],
   "author": "GlobalS1",
   "license": "ISC",
+  "packageManager": "pnpm@9.15.4",
   "type": "commonjs",
   "dependencies": {
     "ajv": "^8.18.0",
