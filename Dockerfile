@@ -31,9 +31,9 @@ COPY --from=builder /app/config ./config
 RUN chown -R nodejs:nodejs /app
 USER nodejs
 
-EXPOSE 3080
+EXPOSE 3100
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3080/v1/health/live || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3100/v1/health/live || exit 1
 
 CMD ["node", "build/index.js"]

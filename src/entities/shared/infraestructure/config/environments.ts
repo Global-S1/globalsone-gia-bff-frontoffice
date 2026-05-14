@@ -5,7 +5,7 @@ export const env: IEnvironments = {
   stage: String(process.env.STAGE || "DEV"),
   app: {
     name: process.env.APP_NAME || "BFF-SERVICE",
-    port: Number(process.env.APP_PORT ?? 3000),
+    port: Number(process.env.APP_PORT ?? 3100),
     defaultLang: (process.env.APP_DEFAULT_LANG as LANG) || LANG.ES,
   },
   services: {
