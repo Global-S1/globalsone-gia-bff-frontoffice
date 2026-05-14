@@ -11,7 +11,6 @@ interface IEnvServices {
 }
 
 interface IEnvBff {
-  jwtSecret: string;
   cacheEnabled: boolean;
   cacheDefaultTtl: number;
 }

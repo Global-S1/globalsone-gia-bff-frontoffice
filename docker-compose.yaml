@@ -14,7 +14,6 @@ services:
       - APP_DEFAULT_LANG=${APP_DEFAULT_LANG:-es}
       - REDIS_HOST=${REDIS_HOST:-db-bff-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
-      - BFF_JWT_SECRET=${BFF_JWT_SECRET}
       - BFF_CACHE_ENABLED=${BFF_CACHE_ENABLED:-true}
       - BFF_CACHE_DEFAULT_TTL=${BFF_CACHE_DEFAULT_TTL:-300}
       - MS_AUTH_URL=${MS_AUTH_URL:-http://ms-auth-gia:3020}

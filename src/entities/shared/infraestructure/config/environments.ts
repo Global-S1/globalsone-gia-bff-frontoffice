@@ -16,7 +16,6 @@ export const env: IEnvironments = {
     },
   },
   bff: {
-    jwtSecret: String(process.env.BFF_JWT_SECRET || "change-me"),
     cacheEnabled: process.env.BFF_CACHE_ENABLED === "true",
     cacheDefaultTtl: Number(process.env.BFF_CACHE_DEFAULT_TTL || 300),
   },

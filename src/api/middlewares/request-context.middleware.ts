@@ -17,7 +17,7 @@ export function requestContextMiddleware(
     correlationId: req.headers["x-correlation-id"] as string,
     userId: req.user?.sub,
     userEmail: req.user?.email,
-    userRoles: req.user?.roles,
+    userRoles: req.user?.role ? [req.user.role] : req.user?.roles,
     authorizationHeader: req.headers.authorization,
     timestamp: new Date(),
     clientIp: getClientIp(req),
