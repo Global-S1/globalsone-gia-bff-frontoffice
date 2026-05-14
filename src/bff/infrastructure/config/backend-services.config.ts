@@ -123,10 +123,8 @@ export async function getServicesHealth(): Promise<IServicesHealth> {
  * Service keys enum for type safety
  */
 export const ServiceKeys = {
-  USERS: "users",
-  ORDERS: "orders",
-  PRODUCTS: "products",
-  NOTIFICATIONS: "notifications",
+  MS_AUTH: "ms-auth",
+  MS_AGENTS: "ms-agents",
 } as const;
 
 export type ServiceKey = (typeof ServiceKeys)[keyof typeof ServiceKeys];

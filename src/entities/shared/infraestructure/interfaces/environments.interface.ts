@@ -21,10 +21,8 @@ interface IEnvBackendService {
 }
 
 interface IEnvBackendServices {
-  users: IEnvBackendService;
-  orders: IEnvBackendService;
-  products: IEnvBackendService;
-  notifications: IEnvBackendService;
+  auth: IEnvBackendService;
+  agents: IEnvBackendService;
 }
 
 export interface IEnvironments {

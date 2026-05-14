@@ -21,24 +21,11 @@ export const env: IEnvironments = {
     cacheDefaultTtl: Number(process.env.BFF_CACHE_DEFAULT_TTL || 300),
   },
   backendServices: {
-    users: {
-      url: String(process.env.USERS_SERVICE_URL || "http://users-service:3001"),
+    auth: {
+      url: String(process.env.MS_AUTH_URL || "http://ms-auth-gia:3020"),
     },
-    orders: {
-      url: String(
-        process.env.ORDERS_SERVICE_URL || "http://orders-service:3002"
-      ),
-    },
-    products: {
-      url: String(
-        process.env.PRODUCTS_SERVICE_URL || "http://products-service:3003"
-      ),
-    },
-    notifications: {
-      url: String(
-        process.env.NOTIFICATIONS_SERVICE_URL ||
-          "http://notifications-service:3004"
-      ),
+    agents: {
+      url: String(process.env.MS_AGENTS_URL || "http://ms-agents-gia:3040"),
     },
   },
 };
