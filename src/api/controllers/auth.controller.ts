@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { getAuthServiceClient } from "../../bff/infrastructure/service-clients/auth-service.client";
-import { StatusCodes } from "../entities/shared/infraestructure/lib/http-status-codes";
+import { StatusCodes } from "../../entities/shared/infraestructure/lib/http-status-codes";
 
 function context(req: Request) {
   return (req as any).requestContext ?? {
@@ -65,7 +65,7 @@ export class AuthController {
 
   // Stub: ms-auth doesn't have self-registration yet.
   // When ms-auth adds POST /v1/auth/register, proxy here.
-  async register(req: Request, res: Response): Promise<void> {
+  async register(_req: Request, res: Response): Promise<void> {
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
