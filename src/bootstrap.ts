@@ -13,9 +13,13 @@ export async function bootstrap(): Promise<Express> {
     loadBackendServicesConfig();
     appConsole.log("✅ Backend services configuration loaded");
 
-    // Connect to Redis (required for aggregated response caching)
-    await redisCache.connect();
-    appConsole.log("✅ Redis connected");
+    // Connect to Redis (optional — used for response caching)
+    try {
+      await redisCache.connect();
+      appConsole.log("✅ Redis connected");
+    } catch (err) {
+      appConsole.error("⚠️  Redis no disponible — caché deshabilitada:", err);
+    }
 
     // Return configured Express server
     return server();

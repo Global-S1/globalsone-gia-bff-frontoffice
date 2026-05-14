@@ -26,4 +26,7 @@ export interface IRequestContext {
 
   /** User agent string */
   userAgent?: string;
+
+  /** Unique organization token for ms-agents identity resolution */
+  uniqueTenantToken?: string;
 }

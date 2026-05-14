@@ -5,6 +5,7 @@ import { authMiddleware } from "./middlewares/auth.middleware";
 import { requestContextMiddleware } from "./middlewares/request-context.middleware";
 import { getServicesHealth } from "../bff/infrastructure/config/backend-services.config";
 import { authRoutes } from "./routes/auth.routes";
+import { chatRoutes } from "./routes/chat.routes";
 
 export function api(): Router {
   const router = Router();
@@ -110,7 +111,8 @@ export function api(): Router {
   // Apply request context middleware (extracts user info, correlation ID, etc.)
   bffRouter.use(requestContextMiddleware);
 
-  // BFF routes — to be added in subsequent phases
+  // BFF routes
+  bffRouter.use("/bff", chatRoutes());
 
   // Mount BFF routes
   router.use("/", bffRouter);

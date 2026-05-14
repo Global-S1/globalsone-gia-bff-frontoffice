@@ -225,6 +225,11 @@ export abstract class BaseServiceClient implements IServiceClient {
       headers["X-User-Roles"] = context.userRoles.join(",");
     }
 
+    // Forward unique org token for ms-agents identity resolution
+    if (context.uniqueTenantToken) {
+      headers["x-unique-token"] = context.uniqueTenantToken;
+    }
+
     // Add custom headers
     if (customHeaders) {
       Object.assign(headers, customHeaders);

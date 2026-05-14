@@ -59,6 +59,7 @@ export async function authMiddleware(
       tenantId: headers["x-tenant-id"] as string,
       role: headers["x-user-role"] as string,
       permissions: headers["x-user-permissions"] as string,
+      uniqueTenantToken: headers["x-unique-token"] as string,
     };
 
     // Forward identity to upstream services

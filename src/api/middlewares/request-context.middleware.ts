@@ -22,6 +22,7 @@ export function requestContextMiddleware(
     timestamp: new Date(),
     clientIp: getClientIp(req),
     userAgent: req.headers["user-agent"],
+    uniqueTenantToken: req.user?.uniqueTenantToken,
   };
 
   // Attach context to request for use in controllers
