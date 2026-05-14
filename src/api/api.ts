@@ -4,6 +4,7 @@ import { env } from "../entities/shared/infraestructure/config/environments";
 import { authMiddleware } from "./middlewares/auth.middleware";
 import { requestContextMiddleware } from "./middlewares/request-context.middleware";
 import { getServicesHealth } from "../bff/infrastructure/config/backend-services.config";
+import { authRoutes } from "./routes/auth.routes";
 
 export function api(): Router {
   const router = Router();
@@ -96,6 +97,9 @@ export function api(): Router {
       });
     }
   });
+
+  // Public auth routes (no JWT required)
+  router.use("/auth", authRoutes());
 
   // Protected BFF routes
   const bffRouter = Router();

@@ -8,32 +8,39 @@ export interface ILoginPayload {
   password: string;
 }
 
-export interface IRegisterPayload {
-  documentType: "DNI" | "CE";
-  documentNumber: string;
-  fullName: string;
-  phoneNumber: string;
+export interface ISwitchTenantPayload {
+  userId: string;
+  tenantId: string;
+}
+
+export interface IAuthUser {
+  id: string;
   email: string;
-  password: string;
-  organizationToken: string;
+  tenantId: string;
+  role: string;
+  mustChangePassword: boolean;
 }
 
-export interface IAuthTokenResponse {
-  token: string;
-  user: {
-    id: string;
-    email: string;
-    fullName: string;
-    documentType: string;
-    documentNumber: string;
-    phoneNumber: string;
-  };
+export interface ITenantSummary {
+  id: string;
+  name: string;
+  role: string;
 }
 
-export interface IRegisterResponse {
-  message: string;
-  status: "pending" | "approved";
+export interface ILoginTokenResult {
+  accessToken: string;
+  refreshToken: string;
+  user: IAuthUser;
 }
+
+export interface ILoginSelectionResult {
+  requiresSelection: true;
+  userId: string;
+  email: string;
+  tenants: ITenantSummary[];
+}
+
+export type ILoginResult = ILoginTokenResult | ILoginSelectionResult;
 
 export class AuthServiceClient extends BaseServiceClient {
   constructor() {
@@ -43,54 +50,43 @@ export class AuthServiceClient extends BaseServiceClient {
   async login(
     payload: ILoginPayload,
     context: IRequestContext
-  ): Promise<IServiceResponse<IAuthTokenResponse>> {
-    return this.request<IAuthTokenResponse>(
+  ): Promise<IServiceResponse<ILoginResult>> {
+    return this.request<ILoginResult>(
       { method: "POST", path: "/v1/auth/login", body: payload },
       context
     );
   }
 
-  async register(
-    payload: IRegisterPayload,
+  async switchTenant(
+    payload: ISwitchTenantPayload,
     context: IRequestContext
-  ): Promise<IServiceResponse<IRegisterResponse>> {
-    return this.request<IRegisterResponse>(
-      { method: "POST", path: "/v1/auth/register", body: payload },
+  ): Promise<IServiceResponse<ILoginTokenResult>> {
+    return this.request<ILoginTokenResult>(
+      { method: "POST", path: "/v1/auth/switch-tenant", body: payload },
       context
     );
   }
 
-  async verifyOtp(
-    email: string,
-    code: string,
-    context: IRequestContext
-  ): Promise<IServiceResponse<{ verified: boolean }>> {
-    return this.request<{ verified: boolean }>(
-      { method: "POST", path: "/v1/auth/verify-otp", body: { email, code } },
-      context
-    );
-  }
-
-  async recoverPassword(
+  async forgotPassword(
     email: string,
     context: IRequestContext
   ): Promise<IServiceResponse<{ message: string }>> {
     return this.request<{ message: string }>(
-      { method: "POST", path: "/v1/auth/recover-password", body: { email } },
+      { method: "POST", path: "/v1/auth/forgot-password", body: { email } },
       context
     );
   }
 
   async resetPassword(
     token: string,
-    password: string,
+    newPassword: string,
     context: IRequestContext
   ): Promise<IServiceResponse<{ message: string }>> {
     return this.request<{ message: string }>(
       {
         method: "POST",
         path: "/v1/auth/reset-password",
-        body: { token, password },
+        body: { token, newPassword },
       },
       context
     );
