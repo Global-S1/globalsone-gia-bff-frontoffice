@@ -12,7 +12,7 @@ services:
       - APP_NAME=${APP_NAME:-bff-frontoffice-gia}
       - APP_PORT=3080
       - APP_DEFAULT_LANG=${APP_DEFAULT_LANG:-es}
-      - REDIS_HOST=${REDIS_HOST:-db-bff-redis}
+      - REDIS_HOST=${REDIS_HOST:-redis-global-gia}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - BFF_CACHE_ENABLED=${BFF_CACHE_ENABLED:-true}
       - BFF_CACHE_DEFAULT_TTL=${BFF_CACHE_DEFAULT_TTL:-300}
