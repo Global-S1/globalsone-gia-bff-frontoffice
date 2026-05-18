@@ -6,12 +6,14 @@ import { requestContextMiddleware } from "./middlewares/request-context.middlewa
 import { getServicesHealth } from "../bff/infrastructure/config/backend-services.config";
 import { authRoutes } from "./routes/auth.routes";
 import { chatRoutes } from "./routes/chat.routes";
+import { ApiResponse } from "../entities/shared/infraestructure/utils/api-response";
 
 export function api(): Router {
   const router = Router();
 
   // Health check endpoint - basic (no auth required)
   router.get("/health", (_req: Request, res: Response) => {
+    const startTime = process.hrtime();
     const healthInfo = {
       status: "healthy",
       service: env.app.name,
@@ -24,7 +26,9 @@ export function api(): Router {
       },
     };
 
-    res.status(StatusCodes.OK).json(healthInfo);
+    res.status(StatusCodes.OK).json(
+      ApiResponse.success(healthInfo, "Servicio online", StatusCodes.OK, startTime)
+    );
   });
 
   // Liveness probe (simple check for Kubernetes)
