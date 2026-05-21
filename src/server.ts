@@ -1,4 +1,5 @@
 import express, { Express, Request, Response, NextFunction } from "express";
+import path from "path";
 import cors from "cors";
 import { pinoHttp } from "pino-http";
 import { env } from "./entities/shared/infraestructure/config/environments";
@@ -66,6 +67,7 @@ export function server(): Express {
   }
 
   // API routes
+  app.use("/uploads", express.static(path.join("/app", "uploads")));
   app.use("/v1", api());
 
   // 404 handler

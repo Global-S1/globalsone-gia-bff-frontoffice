@@ -6,6 +6,7 @@ import { requestContextMiddleware } from "./middlewares/request-context.middlewa
 import { getServicesHealth } from "../bff/infrastructure/config/backend-services.config";
 import { authRoutes } from "./routes/auth.routes";
 import { chatRoutes } from "./routes/chat.routes";
+import { profileRoutes } from "./routes/profile.routes";
 import { ApiResponse } from "../entities/shared/infraestructure/utils/api-response";
 
 export function api(): Router {
@@ -117,6 +118,7 @@ export function api(): Router {
 
   // BFF routes
   bffRouter.use("/bff", chatRoutes());
+  bffRouter.use("/bff/profile", profileRoutes());
 
   // Mount BFF routes
   router.use("/", bffRouter);

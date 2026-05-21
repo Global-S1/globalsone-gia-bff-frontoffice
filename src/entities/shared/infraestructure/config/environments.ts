@@ -3,6 +3,8 @@ import { IEnvironments } from "../interfaces/environments.interface";
 
 export const env: IEnvironments = {
   stage: String(process.env.STAGE || "DEV"),
+  tenantId: String(process.env.TENANT_ID || ""),
+  internalServiceToken: String(process.env.INTERNAL_SERVICE_TOKEN || ""),
   app: {
     name: process.env.APP_NAME || "BFF-SERVICE",
     port: Number(process.env.APP_PORT ?? 3100),

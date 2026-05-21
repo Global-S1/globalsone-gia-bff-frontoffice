@@ -42,6 +42,21 @@ export interface ILoginSelectionResult {
 
 export type ILoginResult = ILoginTokenResult | ILoginSelectionResult;
 
+export interface ISelfRegisterPayload {
+  email: string;
+  password: string;
+  dni: string;
+  name: string;
+  phone: string;
+  tenantId: string;
+  voucherPath?: string;
+}
+
+export interface ISelfRegisterResult {
+  userId: string;
+  status: "pending";
+}
+
 export class AuthServiceClient extends BaseServiceClient {
   constructor() {
     super(getServiceConfig(ServiceKeys.MS_AUTH));
@@ -88,6 +103,32 @@ export class AuthServiceClient extends BaseServiceClient {
         path: "/v1/auth/reset-password",
         body: { token, newPassword },
       },
+      context
+    );
+  }
+
+  async selfRegister(
+    payload: ISelfRegisterPayload,
+    internalServiceToken: string,
+    context: IRequestContext
+  ): Promise<IServiceResponse<ISelfRegisterResult>> {
+    return this.request<ISelfRegisterResult>(
+      {
+        method: "POST",
+        path: "/v1/rbac/users/self-register",
+        body: payload,
+        headers: { "X-Internal-Service-Token": internalServiceToken },
+      },
+      context
+    );
+  }
+
+  async getUserProfile(
+    userId: string,
+    context: IRequestContext
+  ): Promise<IServiceResponse<any>> {
+    return this.request<any>(
+      { method: "GET", path: `/v1/rbac/users/${userId}` },
       context
     );
   }

@@ -143,7 +143,7 @@ export abstract class BaseServiceClient implements IServiceClient {
           // Error response
           error = {
             code: String(response.statusCode),
-            message: parsed.error?.message || parsed.message || "Request failed",
+            message: parsed.kindMessage || parsed.error?.message || parsed.message || "Request failed",
             service: this.serviceName,
             details: parsed,
           };

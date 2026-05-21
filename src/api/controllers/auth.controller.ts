@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getAuthServiceClient } from "../../bff/infrastructure/service-clients/auth-service.client";
 import { StatusCodes } from "../../entities/shared/infraestructure/lib/http-status-codes";
+import { env } from "../../entities/shared/infraestructure/config/environments";
 
 function context(req: Request) {
   return (req as any).requestContext ?? {
@@ -63,14 +64,38 @@ export class AuthController {
     res.status(StatusCodes.OK).json({ success: true, data: { message: "Contraseña actualizada correctamente." } });
   }
 
-  // Stub: ms-auth doesn't have self-registration yet.
-  // When ms-auth adds POST /v1/auth/register, proxy here.
-  async register(_req: Request, res: Response): Promise<void> {
-    res.status(StatusCodes.OK).json({
+  async register(req: Request, res: Response): Promise<void> {
+    const client = getAuthServiceClient();
+    const { email, password, documentNumber, fullName, phoneNumber } = req.body;
+
+    if (!email || !password || !documentNumber || !fullName || !phoneNumber) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        error: "Campos obligatorios: email, password, documentNumber, fullName, phoneNumber",
+      });
+      return;
+    }
+
+    const voucherPath = (req as any).file
+      ? `/uploads/vouchers/${(req as any).file.filename}`
+      : undefined;
+
+    const result = await client.selfRegister(
+      { email, password, dni: documentNumber, name: fullName, phone: phoneNumber, tenantId: env.tenantId, voucherPath },
+      env.internalServiceToken,
+      context(req)
+    );
+
+    if (!result.success) {
+      res.status(result.statusCode).json({ success: false, error: result.error });
+      return;
+    }
+
+    res.status(StatusCodes.CREATED).json({
       success: true,
       data: {
         status: "pending",
-        message: "Solicitud recibida. El administrador revisará tu solicitud de acceso.",
+        message: "Solicitud enviada. El administrador revisará tu solicitud de acceso.",
       },
     });
   }
