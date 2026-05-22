@@ -18,8 +18,9 @@ services:
       - BFF_CACHE_DEFAULT_TTL=${BFF_CACHE_DEFAULT_TTL:-300}
       - MS_AUTH_URL=${MS_AUTH_URL:-http://ms-auth-gia:3020}
       - MS_AGENTS_URL=${MS_AGENTS_URL:-http://ms-agents-gia:3040}
+    networks:
+      - coolify
 
 networks:
-  default:
-    name: coolify
+  coolify:
     external: true
