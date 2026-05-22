@@ -28,7 +28,9 @@ RUN pnpm install --prod --frozen-lockfile
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/config ./config
 
-RUN chown -R nodejs:nodejs /app
+# Pre-create uploads dir owned by nodejs so the named volume inherits the ownership
+# on first mount (Docker copies the perms of the underlying path into the empty volume).
+RUN mkdir -p /app/uploads/vouchers && chown -R nodejs:nodejs /app
 USER nodejs
 
 EXPOSE 3100
