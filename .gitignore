@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+uploads/
 
 # Build output
 build/
@@ -9,6 +10,9 @@ dist/
 .env
 .env.local
 .env.*.local
+
+docker-compose.override.yaml
+docker-compose.override.yml
 
 # IDE
 .idea/

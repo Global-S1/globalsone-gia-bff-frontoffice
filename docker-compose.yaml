@@ -5,12 +5,10 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    ports:
-      - "0:3080"
     environment:
       - STAGE=${STAGE:-PROD}
       - APP_NAME=${APP_NAME:-bff-frontoffice-gia}
-      - APP_PORT=3080
+      - APP_PORT=${APP_PORT:-3100}
       - APP_DEFAULT_LANG=${APP_DEFAULT_LANG:-es}
       - REDIS_HOST=${REDIS_HOST:-redis-global-gia}
       - REDIS_PORT=${REDIS_PORT:-6379}
@@ -18,8 +16,13 @@ services:
       - BFF_CACHE_DEFAULT_TTL=${BFF_CACHE_DEFAULT_TTL:-300}
       - MS_AUTH_URL=${MS_AUTH_URL:-http://ms-auth-gia:3020}
       - MS_AGENTS_URL=${MS_AGENTS_URL:-http://ms-agents-gia:3040}
+    volumes:
+      - bff-frontoffice-uploads:/app/uploads
     networks:
       - coolify
+
+volumes:
+  bff-frontoffice-uploads:
 
 networks:
   coolify:
