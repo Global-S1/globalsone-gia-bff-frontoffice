@@ -33,7 +33,7 @@ USER nodejs
 
 EXPOSE 3100
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3100/v1/health/live || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider "http://localhost:${APP_PORT:-3100}/v1/health/live" || exit 1
 
 CMD ["node", "build/index.js"]

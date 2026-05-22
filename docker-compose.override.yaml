@@ -4,8 +4,6 @@ services:
       context: .
       target: development
     command: npx --yes tsx watch index.ts
-    ports:
-      - "0:3100"
     environment:
       - APP_PORT=3100
       - TENANT_ID=${TENANT_ID}
