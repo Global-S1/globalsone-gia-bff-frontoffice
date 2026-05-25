@@ -60,7 +60,7 @@ export class AgentsServiceClient extends BaseServiceClient {
     return this.request<IAgent>(
       {
         method: "GET",
-        path: "/agent/find-agents",
+        path: "/v1/agent/find-agents",
         query: { uniqueOrganizationToken: orgToken, defaultOnly: true },
       },
       context
@@ -74,7 +74,7 @@ export class AgentsServiceClient extends BaseServiceClient {
     return this.request<IAgent[]>(
       {
         method: "GET",
-        path: "/agent/find-agents",
+        path: "/v1/agent/find-agents",
         query: { uniqueOrganizationToken: orgToken },
       },
       context
@@ -86,7 +86,7 @@ export class AgentsServiceClient extends BaseServiceClient {
     context: IRequestContext
   ): Promise<IServiceResponse<ICreateChatResponse>> {
     return this.request<ICreateChatResponse>(
-      { method: "POST", path: "/create-chat", body: payload },
+      { method: "POST", path: "/v1/chat/create-chat", body: payload },
       context
     );
   }
@@ -99,7 +99,7 @@ export class AgentsServiceClient extends BaseServiceClient {
     return this.request<IConversation[]>(
       {
         method: "GET",
-        path: "/find-chats",
+        path: "/v1/chat/find-chats",
         query: { uniqueOrganizationToken: orgToken, userId },
       },
       context
@@ -111,7 +111,7 @@ export class AgentsServiceClient extends BaseServiceClient {
     context: IRequestContext
   ): Promise<IServiceResponse<IConversation & { interactions: IMessage[] }>> {
     return this.request<IConversation & { interactions: IMessage[] }>(
-      { method: "GET", path: `/find-chat-by-id/${chatId}` },
+      { method: "GET", path: `/v1/chat/find-chat-by-id/${chatId}` },
       context
     );
   }
@@ -121,7 +121,7 @@ export class AgentsServiceClient extends BaseServiceClient {
     context: IRequestContext
   ): Promise<IServiceResponse<void>> {
     return this.request<void>(
-      { method: "DELETE", path: `/delete-chat/${chatId}` },
+      { method: "DELETE", path: `/v1/chat/delete-chat/${chatId}` },
       context
     );
   }

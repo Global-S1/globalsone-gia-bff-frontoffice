@@ -3,14 +3,15 @@ import { request } from "undici";
 import { env } from "../../entities/shared/infraestructure/config/environments";
 import { getAgentsServiceClient } from "../../bff/infrastructure/service-clients/agents-service.client";
 
-async function resolveDefaultAgentId(uniqueTenantToken: string, correlationId: string): Promise<string | null> {
+async function resolveDefaultAgentId(uniqueTenantToken: string, userId: string, correlationId: string): Promise<string | null> {
   try {
     const { statusCode, body } = await request(
-      `${env.backendServices.agents.url}/agent/find-agents?defaultOnly=true`,
+      `${env.backendServices.agents.url}/v1/agent/find-agents?defaultOnly=true`,
       {
         method: "GET",
         headers: {
           "x-unique-token": uniqueTenantToken,
+          "x-user-id": userId,
           "X-Correlation-ID": correlationId,
         },
         headersTimeout: 5000,
@@ -30,39 +31,41 @@ async function resolveDefaultAgentId(uniqueTenantToken: string, correlationId: s
 export async function createConversation(req: Request, res: Response): Promise<void> {
   const { question, conversationId } = req.body as { question: string; conversationId?: string };
   const uniqueTenantToken = req.user?.uniqueTenantToken;
+  const userId = req.user?.sub;
 
   if (!question?.trim()) {
     res.status(400).json({ success: false, error: { code: "BAD_REQUEST", message: "La pregunta no puede estar vacía" } });
     return;
   }
 
-  if (!uniqueTenantToken) {
-    res.status(403).json({ success: false, error: { code: "FORBIDDEN", message: "Token de organización no disponible" } });
+  if (!uniqueTenantToken || !userId) {
+    res.status(403).json({ success: false, error: { code: "FORBIDDEN", message: "Contexto de usuario u organización no disponible" } });
     return;
   }
 
   const correlationId = (req.headers["x-correlation-id"] as string) ?? "";
 
   const payload: Record<string, unknown> = {
-    question,
+    message: question,
     uniqueOrganizationToken: uniqueTenantToken,
   };
   if (conversationId) {
     payload.chatPerUserId = conversationId;
   } else {
     // New conversation — resolve default frontoffice agent
-    const agentId = await resolveDefaultAgentId(uniqueTenantToken, correlationId);
+    const agentId = await resolveDefaultAgentId(uniqueTenantToken, userId, correlationId);
     if (agentId) payload.agentId = agentId;
   }
 
   try {
     const { statusCode, headers, body } = await request(
-      `${env.backendServices.agents.url}/create-chat`,
+      `${env.backendServices.agents.url}/v1/chat/create-chat`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "x-unique-token": uniqueTenantToken,
+          "x-user-id": userId,
           "X-Correlation-ID": correlationId,
         },
         body: JSON.stringify(payload),
