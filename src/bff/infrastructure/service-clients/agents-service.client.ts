@@ -125,6 +125,15 @@ export class AgentsServiceClient extends BaseServiceClient {
       context
     );
   }
+
+  async getMyUsage(
+    context: IRequestContext
+  ): Promise<IServiceResponse<{ tokensUsed: number; interactions: number; accessUntil: string | null }>> {
+    return this.request(
+      { method: "GET", path: "/v1/stats/my-usage" },
+      context
+    );
+  }
 }
 
 let instance: AgentsServiceClient | null = null;

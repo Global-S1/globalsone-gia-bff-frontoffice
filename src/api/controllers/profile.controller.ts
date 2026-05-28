@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { getAuthServiceClient } from "../../bff/infrastructure/service-clients/auth-service.client";
+import { getAgentsServiceClient } from "../../bff/infrastructure/service-clients/agents-service.client";
 import { StatusCodes } from "../../entities/shared/infraestructure/lib/http-status-codes";
 
 function context(req: Request) {
@@ -8,6 +9,7 @@ function context(req: Request) {
     authorizationHeader: req.headers.authorization,
     userId: req.headers["x-user-id"] as string,
     tenantId: req.headers["x-tenant-id"] as string,
+    uniqueTenantToken: req.headers["x-unique-token"] as string,
   };
 }
 
@@ -29,6 +31,46 @@ export class ProfileController {
       }
 
       res.status(StatusCodes.OK).json({ success: true, data: result.data });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getMyUsage(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.headers["x-user-id"] as string;
+      if (!userId) {
+        res.status(StatusCodes.UNAUTHORIZED).json({ success: false, error: "No autenticado" });
+        return;
+      }
+
+      const ctx = context(req);
+      const agentsClient = getAgentsServiceClient();
+      const authClient = getAuthServiceClient();
+
+      const [usageRes, profileRes] = await Promise.allSettled([
+        agentsClient.getMyUsage(ctx),
+        authClient.getUserProfile(userId, ctx),
+      ]);
+
+      const usage =
+        usageRes.status === "fulfilled" && usageRes.value.success
+          ? usageRes.value.data
+          : { tokensUsed: 0, interactions: 0, accessUntil: null };
+
+      const profile =
+        profileRes.status === "fulfilled" && profileRes.value.success
+          ? (profileRes.value.data as any)
+          : null;
+
+      res.status(StatusCodes.OK).json({
+        success: true,
+        data: {
+          tokensUsed: usage?.tokensUsed ?? 0,
+          interactions: usage?.interactions ?? 0,
+          accessUntil: profile?.accessUntil ?? profile?.membershipExpiresAt ?? null,
+        },
+      });
     } catch (error) {
       next(error);
     }
