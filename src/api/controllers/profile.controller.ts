@@ -39,7 +39,8 @@ export class ProfileController {
   async getMyUsage(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.headers["x-user-id"] as string;
-      if (!userId) {
+      const tenantId = req.headers["x-tenant-id"] as string;
+      if (!userId || !tenantId) {
         res.status(StatusCodes.UNAUTHORIZED).json({ success: false, error: "No autenticado" });
         return;
       }
@@ -48,9 +49,9 @@ export class ProfileController {
       const agentsClient = getAgentsServiceClient();
       const authClient = getAuthServiceClient();
 
-      const [usageRes, profileRes] = await Promise.allSettled([
+      const [usageRes, quotaRes] = await Promise.allSettled([
         agentsClient.getMyUsage(ctx),
-        authClient.getUserProfile(userId, ctx),
+        authClient.getMyMembershipQuota(userId, tenantId, ctx),
       ]);
 
       const usage =
@@ -58,9 +59,9 @@ export class ProfileController {
           ? usageRes.value.data
           : { tokensUsed: 0, interactions: 0, accessUntil: null };
 
-      const profile =
-        profileRes.status === "fulfilled" && profileRes.value.success
-          ? (profileRes.value.data as any)
+      const quota =
+        quotaRes.status === "fulfilled" && quotaRes.value.success
+          ? quotaRes.value.data
           : null;
 
       res.status(StatusCodes.OK).json({
@@ -68,7 +69,9 @@ export class ProfileController {
         data: {
           tokensUsed: usage?.tokensUsed ?? 0,
           interactions: usage?.interactions ?? 0,
-          accessUntil: profile?.accessUntil ?? profile?.membershipExpiresAt ?? null,
+          accessUntil: quota?.accessUntil ?? null,
+          tokenLimit: quota?.tokenLimit ?? null,
+          membershipStatus: quota?.status ?? null,
         },
       });
     } catch (error) {

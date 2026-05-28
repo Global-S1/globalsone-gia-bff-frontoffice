@@ -132,6 +132,37 @@ export class AuthServiceClient extends BaseServiceClient {
       context
     );
   }
+
+  /**
+   * Internal lookup of the {status, accessUntil, tokenLimit} tuple for the
+   * caller's membership in their active tenant. Gated by the internal
+   * service token at ms-auth.
+   */
+  async getMyMembershipQuota(
+    userId: string,
+    tenantId: string,
+    context: IRequestContext
+  ): Promise<IServiceResponse<{
+    membershipId: string;
+    userId: string;
+    tenantId: string;
+    status: string;
+    accessUntil: string | null;
+    tokenLimit: number | null;
+  }>> {
+    const internalServiceToken = process.env.INTERNAL_SERVICE_TOKEN ?? "";
+    return this.request(
+      {
+        method: "GET",
+        path: `/v1/rbac/users/quota/${userId}`,
+        headers: {
+          "X-Internal-Service-Token": internalServiceToken,
+          "X-Tenant-Id": tenantId,
+        },
+      },
+      context
+    );
+  }
 }
 
 let instance: AuthServiceClient | null = null;
