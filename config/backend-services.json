@@ -13,6 +13,13 @@
       "timeout": 10000,
       "retries": 1,
       "healthPath": "/v1/health/live"
+    },
+    "ms-documents": {
+      "name": "ms-documents-gia",
+      "baseUrl": "${MS_DOCUMENTS_URL}",
+      "timeout": 15000,
+      "retries": 1,
+      "healthPath": "/health"
     }
   }
 }

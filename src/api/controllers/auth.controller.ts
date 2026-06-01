@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { getAuthServiceClient } from "../../bff/infrastructure/service-clients/auth-service.client";
+import { getDocumentsServiceClient } from "../../bff/infrastructure/service-clients/documents-service.client";
 import { StatusCodes } from "../../entities/shared/infraestructure/lib/http-status-codes";
 import { env } from "../../entities/shared/infraestructure/config/environments";
+import { logger } from "../../entities/shared/infraestructure/utils/app-console";
 
 function context(req: Request) {
   return (req as any).requestContext ?? {
@@ -38,17 +40,13 @@ export class AuthController {
   async forgotPassword(req: Request, res: Response): Promise<void> {
     const client = getAuthServiceClient();
     const { email } = req.body;
-    const result = await client.forgotPassword(email, context(req));
+    await client.forgotPassword(email, context(req));
 
     // Always 200 for security (don't reveal if email exists)
     res.status(StatusCodes.OK).json({
       success: true,
       data: { message: "Si el email existe, recibirás un enlace de recuperación." },
     });
-
-    if (!result.success) {
-      // Log internally but don't expose
-    }
   }
 
   async resetPassword(req: Request, res: Response): Promise<void> {
@@ -65,23 +63,48 @@ export class AuthController {
   }
 
   async register(req: Request, res: Response): Promise<void> {
-    const client = getAuthServiceClient();
-    const { email, password, documentNumber, fullName, phoneNumber } = req.body;
+    const { email, password, documentType, documentNumber, fullName, phoneNumber } = req.body;
 
-    if (!email || !password || !documentNumber || !fullName || !phoneNumber) {
+    if (!email || !password || !documentType || !documentNumber || !fullName || !phoneNumber) {
       res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        error: "Campos obligatorios: email, password, documentNumber, fullName, phoneNumber",
+        error: "Campos obligatorios: email, password, documentType, documentNumber, fullName, phoneNumber",
       });
       return;
     }
 
-    const voucherPath = (req as any).file
-      ? `/uploads/vouchers/${(req as any).file.filename}`
-      : undefined;
+    if (documentType !== "DNI" && documentType !== "CE") {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        error: "documentType debe ser DNI o CE",
+      });
+      return;
+    }
 
-    const result = await client.selfRegister(
-      { email, password, dni: documentNumber, name: fullName, phone: phoneNumber, tenantId: env.tenantId, voucherPath },
+    let voucherPath: string | undefined;
+
+    const file = (req as any).file as Express.Multer.File | undefined;
+    if (file) {
+      const docsClient = getDocumentsServiceClient();
+      const uploadResult = await docsClient.uploadVoucher({
+        fileBuffer: file.buffer,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        organizationId: env.tenantId,
+        title: `Voucher de pago — ${fullName}`,
+      });
+
+      if (!uploadResult.success) {
+        logger.warn(`[register] Voucher upload failed: ${uploadResult.error}`);
+        // Non-blocking: continue registration without voucher
+      } else {
+        voucherPath = uploadResult.data.id;
+      }
+    }
+
+    const authClient = getAuthServiceClient();
+    const result = await authClient.selfRegister(
+      { email, password, documentType, dni: documentNumber, name: fullName, phone: phoneNumber, tenantId: env.tenantId, voucherPath },
       env.internalServiceToken,
       context(req)
     );

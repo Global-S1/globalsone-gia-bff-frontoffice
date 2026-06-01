@@ -16,8 +16,7 @@ services:
       - BFF_CACHE_DEFAULT_TTL=${BFF_CACHE_DEFAULT_TTL:-300}
       - MS_AUTH_URL=${MS_AUTH_URL:-http://ms-auth-gia:3020}
       - MS_AGENTS_URL=${MS_AGENTS_URL:-http://ms-agents-gia:3040}
-    volumes:
-      - bff-frontoffice-uploads:/app/uploads
+      - MS_DOCUMENTS_URL=${MS_DOCUMENTS_URL:-http://ms-documents-gia:3050}
     networks:
       - coolify
     healthcheck:
@@ -26,9 +25,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
-
-volumes:
-  bff-frontoffice-uploads:
 
 networks:
   coolify:

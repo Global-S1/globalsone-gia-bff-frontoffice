@@ -7,6 +7,7 @@ import { getServicesHealth } from "../bff/infrastructure/config/backend-services
 import { authRoutes } from "./routes/auth.routes";
 import { chatRoutes } from "./routes/chat.routes";
 import { profileRoutes } from "./routes/profile.routes";
+import { documentsRoutes } from "./routes/documents.routes";
 import { ApiResponse } from "../entities/shared/infraestructure/utils/api-response";
 
 export function api(): Router {
@@ -119,6 +120,7 @@ export function api(): Router {
   // BFF routes
   bffRouter.use("/bff", chatRoutes());
   bffRouter.use("/bff/profile", profileRoutes());
+  bffRouter.use("/bff/documents", documentsRoutes());
 
   // Mount BFF routes
   router.use("/", bffRouter);

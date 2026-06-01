@@ -125,6 +125,7 @@ export async function getServicesHealth(): Promise<IServicesHealth> {
 export const ServiceKeys = {
   MS_AUTH: "ms-auth",
   MS_AGENTS: "ms-agents",
+  MS_DOCUMENTS: "ms-documents",
 } as const;
 
 export type ServiceKey = (typeof ServiceKeys)[keyof typeof ServiceKeys];

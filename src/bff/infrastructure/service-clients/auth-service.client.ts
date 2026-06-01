@@ -45,6 +45,7 @@ export type ILoginResult = ILoginTokenResult | ILoginSelectionResult;
 export interface ISelfRegisterPayload {
   email: string;
   password: string;
+  documentType: "DNI" | "CE";
   dni: string;
   name: string;
   phone: string;
